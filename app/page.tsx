@@ -1,65 +1,182 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import VelocityChart from "@/components/dashboard/velocity-chart";
+import RadarChart from "@/components/dashboard/radar-chart";
+import SessionHistory from "@/components/dashboard/session-history";
+import {
+  getSessions,
+  getVelocityTrend,
+  getStreak,
+  getPendingRecallSession,
+} from "@/lib/storage";
+import type { Session, VelocityDataPoint } from "@/lib/types";
+
+export default function Dashboard() {
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [trend, setTrend] = useState<VelocityDataPoint[]>([]);
+  const [streak, setStreak] = useState(0);
+  const [hasRecall, setHasRecall] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setSessions(getSessions());
+    setTrend(getVelocityTrend());
+    setStreak(getStreak());
+    setHasRecall(getPendingRecallSession() !== null);
+    setMounted(true);
+  }, []);
+
+  // Derived stats
+  const totalSessions = sessions.length;
+  const latestVelocity =
+    sessions.length > 0
+      ? [...sessions].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )[0].velocityScore
+      : null;
+  const avgVelocity =
+    sessions.length > 0
+      ? Math.round(
+          sessions.reduce((sum, s) => sum + s.velocityScore, 0) /
+            sessions.length
+        )
+      : null;
+
+  // Latest session stats for radar chart
+  const latestSession =
+    sessions.length > 0
+      ? [...sessions].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )[0]
+      : null;
+
+  // Don't render until client-side to avoid hydration mismatch with localStorage
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="max-w-3xl mx-auto px-6 py-8">
+      {/* Hero section for first-time users */}
+      {totalSessions === 0 ? (
+        <div className="text-center py-16">
+          <h1 className="text-4xl font-bold mb-3">
+            Train your{" "}
+            <span className="text-accent">learning ability</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-muted text-lg mb-8 max-w-md mx-auto">
+            15-minute daily workouts that measure and improve how fast you
+            absorb, understand, and retain new knowledge.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/session"
+            className="inline-block bg-accent text-background px-8 py-3 rounded-lg font-medium text-lg hover:brightness-110"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Start First Workout
+          </Link>
         </div>
-      </main>
+      ) : (
+        <>
+          {/* Stats bar */}
+          <div className="grid grid-cols-4 gap-4 mb-8">
+            <div className="bg-card border border-card-border rounded-xl p-4 text-center">
+              <p className="text-muted text-xs uppercase tracking-wider mb-1">
+                Velocity
+              </p>
+              <p className="text-3xl font-bold text-accent tabular-nums">
+                {latestVelocity}
+              </p>
+            </div>
+            <div className="bg-card border border-card-border rounded-xl p-4 text-center">
+              <p className="text-muted text-xs uppercase tracking-wider mb-1">
+                Average
+              </p>
+              <p className="text-3xl font-bold text-foreground tabular-nums">
+                {avgVelocity}
+              </p>
+            </div>
+            <div className="bg-card border border-card-border rounded-xl p-4 text-center">
+              <p className="text-muted text-xs uppercase tracking-wider mb-1">
+                Sessions
+              </p>
+              <p className="text-3xl font-bold text-foreground tabular-nums">
+                {totalSessions}
+              </p>
+            </div>
+            <div className="bg-card border border-card-border rounded-xl p-4 text-center">
+              <p className="text-muted text-xs uppercase tracking-wider mb-1">
+                Streak
+              </p>
+              <p className="text-3xl font-bold text-warning tabular-nums">
+                {streak}
+              </p>
+            </div>
+          </div>
+
+          {/* Radar chart — your learning shape */}
+          {latestSession && (
+            <div className="bg-card border border-card-border rounded-xl p-6 mb-6">
+              <h3 className="text-sm font-medium text-muted mb-4">
+                Your Learning Shape
+              </h3>
+              <div className="flex justify-center">
+                <RadarChart
+                  speed={latestSession.speedScore}
+                  comprehension={latestSession.comprehensionScore}
+                  retention={latestSession.retentionScore}
+                  trend={Math.min(100, Math.max(0, latestVelocity ?? 50))}
+                  size={240}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Recall prompt */}
+          {hasRecall && (
+            <Link
+              href="/session"
+              className="block bg-accent-dim border border-accent/30 rounded-xl p-4 mb-6 hover:border-accent/50 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-accent">
+                    Recall quiz available
+                  </p>
+                  <p className="text-sm text-muted mt-0.5">
+                    Test what you remember from yesterday to complete your
+                    velocity score
+                  </p>
+                </div>
+                <span className="text-accent text-xl">&rarr;</span>
+              </div>
+            </Link>
+          )}
+
+          {/* Chart */}
+          <div className="mb-6">
+            <VelocityChart data={trend} />
+          </div>
+
+          {/* Start session CTA */}
+          <div className="flex justify-center mb-8">
+            <Link
+              href="/session"
+              className="inline-block bg-accent text-background px-8 py-3 rounded-lg font-medium text-lg hover:brightness-110"
+            >
+              Start Workout
+            </Link>
+          </div>
+
+          {/* History */}
+          <SessionHistory sessions={sessions} />
+        </>
+      )}
     </div>
   );
 }
