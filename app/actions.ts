@@ -1,13 +1,47 @@
 "use server";
 
-import type { Domain, GeneratedContent } from "@/lib/types";
+import type { Domain, GeneratedContent, Question } from "@/lib/types";
 import { getRandomContent } from "@/lib/content";
+
+/**
+ * Fisher-Yates shuffle for an array. Returns a new shuffled copy.
+ */
+function shuffle<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+/**
+ * Shuffle the option order within each question so the correct answer
+ * lands in a random position. Without this, LLM-generated questions
+ * (and our pre-seeded content) heavily bias toward index 1 — users
+ * can game the quiz by always picking B.
+ */
+function shuffleQuestionOptions(questions: Question[]): Question[] {
+  return questions.map((q) => {
+    // Build index array [0, 1, 2, 3], shuffle it
+    const indices = shuffle(q.options.map((_, i) => i));
+    return {
+      ...q,
+      options: indices.map((i) => q.options[i]),
+      // correctIndex moves to wherever the original correct position landed
+      correctIndex: indices.indexOf(q.correctIndex),
+    };
+  });
+}
 
 /**
  * Get content for a learning session.
  *
  * Uses pre-seeded passages by default. When ANTHROPIC_API_KEY is set,
  * falls back to generating fresh content via Claude API.
+ *
+ * All question options are shuffled before returning so the correct
+ * answer position is uniformly distributed across A/B/C/D.
  */
 export async function generateContent(
   preferredDomain?: Domain,
@@ -15,18 +49,27 @@ export async function generateContent(
 ): Promise<GeneratedContent> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
+  let content: GeneratedContent;
+
   // If API key is available, generate fresh content
   if (apiKey) {
     try {
-      return await generateWithAPI(apiKey, preferredDomain);
+      content = await generateWithAPI(apiKey, preferredDomain);
     } catch {
       // Fall back to seeded content if API call fails
-      return getRandomContent(recentTitle, preferredDomain);
+      content = getRandomContent(recentTitle, preferredDomain);
     }
+  } else {
+    // No API key — use pre-seeded content
+    content = getRandomContent(recentTitle, preferredDomain);
   }
 
-  // No API key — use pre-seeded content
-  return getRandomContent(recentTitle, preferredDomain);
+  // Shuffle option order so the correct answer isn't always B
+  return {
+    ...content,
+    comprehensionQuestions: shuffleQuestionOptions(content.comprehensionQuestions),
+    recallQuestions: shuffleQuestionOptions(content.recallQuestions),
+  };
 }
 
 // --- API generation (used when API key is available) ---
