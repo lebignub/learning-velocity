@@ -38,7 +38,7 @@ export default function Reflection({ onComplete }: ReflectionProps) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto animate-fade-in-up">
       <div className="mb-6">
         <h2 className="text-xl font-bold">How did you approach it?</h2>
         <p className="text-muted text-sm mt-1">
@@ -46,17 +46,18 @@ export default function Reflection({ onComplete }: ReflectionProps) {
         </p>
       </div>
 
-      {/* Strategy options */}
+      {/* Strategy options — stagger in */}
       <div className="grid grid-cols-2 gap-3 mb-6">
-        {STRATEGIES.map((s) => (
+        {STRATEGIES.map((s, i) => (
           <button
             key={s.value}
             onClick={() => setSelected(s.value)}
-            className={`p-4 rounded-lg border text-left transition-all cursor-pointer ${
+            className={`p-4 rounded-lg border text-left transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] animate-fade-in-up ${
               selected === s.value
                 ? "border-accent bg-accent/10"
                 : "border-card-border hover:border-accent/30"
             }`}
+            style={{ animationDelay: `${i * 60}ms` }}
           >
             <span className="text-sm">{s.label}</span>
           </button>
@@ -82,7 +83,7 @@ export default function Reflection({ onComplete }: ReflectionProps) {
         <button
           onClick={handleSubmit}
           disabled={!selected}
-          className="bg-accent text-background px-8 py-3 rounded-lg font-medium hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+          className="bg-accent text-background px-8 py-3 rounded-lg font-medium hover:brightness-110 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all cursor-pointer"
         >
           See Results
         </button>

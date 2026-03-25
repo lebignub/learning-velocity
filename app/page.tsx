@@ -66,26 +66,26 @@ export default function Dashboard() {
       {/* Hero section for first-time users */}
       {totalSessions === 0 ? (
         <div className="text-center py-16">
-          <h1 className="text-4xl font-bold mb-3">
+          <h1 className="text-4xl font-bold mb-3 animate-fade-in-up">
             Train your{" "}
             <span className="text-accent">learning ability</span>
           </h1>
-          <p className="text-muted text-lg mb-8 max-w-md mx-auto">
+          <p className="text-muted text-lg mb-8 max-w-md mx-auto animate-fade-in-up delay-1">
             15-minute daily workouts that measure and improve how fast you
             absorb, understand, and retain new knowledge.
           </p>
           <Link
             href="/session"
-            className="inline-block bg-accent text-background px-8 py-3 rounded-lg font-medium text-lg hover:brightness-110"
+            className="inline-block bg-accent text-background px-8 py-3 rounded-lg font-medium text-lg hover:brightness-110 hover:scale-105 active:scale-95 transition-all animate-fade-in-up delay-2"
           >
             Start First Workout
           </Link>
         </div>
       ) : (
         <>
-          {/* Stats bar */}
+          {/* Stats bar — cards stagger in */}
           <div className="grid grid-cols-4 gap-4 mb-8">
-            <div className="bg-card border border-card-border rounded-xl p-4 text-center">
+            <div className="bg-card border border-card-border rounded-xl p-4 text-center animate-fade-in-up delay-0">
               <p className="text-muted text-xs uppercase tracking-wider mb-1">
                 Velocity
               </p>
@@ -93,7 +93,7 @@ export default function Dashboard() {
                 {latestVelocity}
               </p>
             </div>
-            <div className="bg-card border border-card-border rounded-xl p-4 text-center">
+            <div className="bg-card border border-card-border rounded-xl p-4 text-center animate-fade-in-up delay-1">
               <p className="text-muted text-xs uppercase tracking-wider mb-1">
                 Average
               </p>
@@ -101,7 +101,7 @@ export default function Dashboard() {
                 {avgVelocity}
               </p>
             </div>
-            <div className="bg-card border border-card-border rounded-xl p-4 text-center">
+            <div className="bg-card border border-card-border rounded-xl p-4 text-center animate-fade-in-up delay-2">
               <p className="text-muted text-xs uppercase tracking-wider mb-1">
                 Sessions
               </p>
@@ -109,7 +109,7 @@ export default function Dashboard() {
                 {totalSessions}
               </p>
             </div>
-            <div className="bg-card border border-card-border rounded-xl p-4 text-center">
+            <div className="bg-card border border-card-border rounded-xl p-4 text-center animate-fade-in-up delay-3">
               <p className="text-muted text-xs uppercase tracking-wider mb-1">
                 Streak
               </p>
@@ -121,7 +121,7 @@ export default function Dashboard() {
 
           {/* Radar chart — your learning shape */}
           {latestSession && (
-            <div className="bg-card border border-card-border rounded-xl p-6 mb-6">
+            <div className="bg-card border border-card-border rounded-xl p-6 mb-6 animate-fade-in-up delay-4">
               <h3 className="text-sm font-medium text-muted mb-4">
                 Your Learning Shape
               </h3>
@@ -137,11 +137,11 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Recall prompt */}
+          {/* Recall prompt — glow to draw attention */}
           {hasRecall && (
             <Link
               href="/session"
-              className="block bg-accent-dim border border-accent/30 rounded-xl p-4 mb-6 hover:border-accent/50 transition-colors"
+              className="block bg-accent-dim border border-accent/30 rounded-xl p-4 mb-6 hover:border-accent/50 hover:scale-[1.01] active:scale-[0.99] transition-all animate-pulse-glow animate-fade-in-up delay-3"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -159,22 +159,24 @@ export default function Dashboard() {
           )}
 
           {/* Chart */}
-          <div className="mb-6">
+          <div className="mb-6 animate-fade-in-up delay-5">
             <VelocityChart data={trend} />
           </div>
 
           {/* Start session CTA */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-8 animate-fade-in-up delay-6">
             <Link
               href="/session"
-              className="inline-block bg-accent text-background px-8 py-3 rounded-lg font-medium text-lg hover:brightness-110"
+              className="inline-block bg-accent text-background px-8 py-3 rounded-lg font-medium text-lg hover:brightness-110 hover:scale-105 active:scale-95 transition-all"
             >
               Start Workout
             </Link>
           </div>
 
           {/* History */}
-          <SessionHistory sessions={sessions} />
+          <div className="animate-fade-in-up delay-7">
+            <SessionHistory sessions={sessions} />
+          </div>
         </>
       )}
     </div>

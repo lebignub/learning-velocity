@@ -248,24 +248,24 @@ export default function SessionPage() {
     <div className="px-6 py-8">
       {/* Onboarding — shown once for first-time users */}
       {phase === "onboarding" && (
-        <div className="max-w-md mx-auto text-center py-12">
+        <div className="max-w-md mx-auto text-center py-12 animate-fade-in-up">
           <h2 className="text-2xl font-bold mb-4">How it works</h2>
           <div className="space-y-4 text-left mb-8">
-            <div className="flex gap-3 items-start">
+            <div className="flex gap-3 items-start animate-fade-in-up delay-1">
               <span className="text-accent font-bold text-lg w-6 shrink-0">1</span>
               <p className="text-foreground/90">
                 <strong>Read</strong> a short passage on an unfamiliar topic.
                 A timer tracks your reading speed.
               </p>
             </div>
-            <div className="flex gap-3 items-start">
+            <div className="flex gap-3 items-start animate-fade-in-up delay-2">
               <span className="text-accent font-bold text-lg w-6 shrink-0">2</span>
               <p className="text-foreground/90">
                 <strong>Answer</strong> comprehension questions that test
                 understanding, not memorization.
               </p>
             </div>
-            <div className="flex gap-3 items-start">
+            <div className="flex gap-3 items-start animate-fade-in-up delay-3">
               <span className="text-accent font-bold text-lg w-6 shrink-0">3</span>
               <p className="text-foreground/90">
                 <strong>Come back tomorrow</strong> for a recall quiz that
@@ -273,14 +273,14 @@ export default function SessionPage() {
               </p>
             </div>
           </div>
-          <p className="text-muted text-sm mb-6">
+          <p className="text-muted text-sm mb-6 animate-fade-in delay-4">
             Your <strong className="text-accent">Learning Velocity</strong>{" "}
             score combines speed, comprehension, and retention. Most people
             score 40–65 on their first session.
           </p>
           <button
             onClick={() => setPhase("pick-domain")}
-            className="bg-accent text-background px-8 py-3 rounded-lg font-medium text-lg hover:brightness-110 cursor-pointer"
+            className="bg-accent text-background px-8 py-3 rounded-lg font-medium text-lg hover:brightness-110 hover:scale-105 active:scale-95 transition-all cursor-pointer animate-fade-in-up delay-5"
           >
             Got it — let&apos;s go
           </button>
@@ -289,17 +289,18 @@ export default function SessionPage() {
 
       {/* Domain selection */}
       {phase === "pick-domain" && (
-        <div className="max-w-md mx-auto text-center py-12">
+        <div className="max-w-md mx-auto text-center py-12 animate-fade-in-up">
           <h2 className="text-xl font-bold mb-2">Pick a domain</h2>
           <p className="text-muted text-sm mb-6">
             Or let us surprise you with a random topic
           </p>
           <div className="space-y-3 mb-6">
-            {DOMAIN_INFO.map((d) => (
+            {DOMAIN_INFO.map((d, i) => (
               <button
                 key={d.value}
                 onClick={() => handleDomainPick(d.value)}
-                className={`w-full p-4 rounded-lg border ${d.color} text-left font-medium hover:brightness-110 transition-all cursor-pointer`}
+                className={`w-full p-4 rounded-lg border ${d.color} text-left font-medium hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer animate-fade-in-up`}
+                style={{ animationDelay: `${100 + i * 80}ms` }}
               >
                 {d.label}
               </button>
@@ -307,7 +308,7 @@ export default function SessionPage() {
           </div>
           <button
             onClick={() => handleDomainPick(undefined)}
-            className="text-muted text-sm hover:text-foreground transition-colors cursor-pointer"
+            className="text-muted text-sm hover:text-foreground transition-colors cursor-pointer animate-fade-in delay-4"
           >
             Surprise me
           </button>
@@ -316,9 +317,9 @@ export default function SessionPage() {
 
       {/* Loading */}
       {phase === "loading" && (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted text-sm">Generating your workout...</p>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 animate-fade-in">
+          <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted text-sm animate-fade-in delay-2">Generating your workout...</p>
         </div>
       )}
 

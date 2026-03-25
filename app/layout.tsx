@@ -38,7 +38,7 @@ export default function RootLayout({
           </Link>
           <Link
             href="/session"
-            className="bg-accent text-background px-4 py-2 rounded-lg text-sm font-medium hover:brightness-110"
+            className="bg-accent text-background px-4 py-2 rounded-lg text-sm font-medium hover:brightness-110 hover:scale-105 active:scale-95 transition-all"
           >
             Start Session
           </Link>
